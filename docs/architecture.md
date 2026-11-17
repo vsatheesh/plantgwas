@@ -16,3 +16,9 @@ It accepts three kinds of input: GBS reads (FASTQ), whole-genome resequencing re
 - Reproducible: every tool in a pinned container; `-resume` after any failure; runs locally, on SLURM, or in the cloud.
 - A single HTML report a breeder can read without opening a terminal.
 
+**Not for version 1**
+
+- Calling variants without a reference genome (k-mer GWAS can be a later option).
+- Phenotype field-trial design or spatial correction beyond BLUPs/BLUEs from a mixed model.
+- Selection decisions: the pipeline ranks lines by GEBV, but crossing plans and selection indices stay with the breeder.
+
