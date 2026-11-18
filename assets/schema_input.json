@@ -1,0 +1,76 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/vsatheesh/plantgwas/main/assets/schema_input.json",
+    "title": "vsatheesh/plantgwas pipeline - params.input schema",
+    "description": "Schema for the samplesheet provided with params.input. Each row is one sample (wgs, vcf) or one sequencing plate (gbs), and input_type selects the entry route.",
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {
+            "sample": {
+                "type": "string",
+                "pattern": "^\\S+$",
+                "errorMessage": "Sample name must be provided and cannot contain spaces",
+                "meta": ["id"]
+            },
+            "input_type": {
+                "type": "string",
+                "enum": ["gbs", "wgs", "vcf"],
+                "errorMessage": "input_type must be one of: gbs, wgs, vcf",
+                "meta": ["input_type"]
+            },
+            "fastq_1": {
+                "type": "string",
+                "format": "file-path",
+                "exists": true,
+                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?q\\.gz$",
+                "errorMessage": "FastQ file for reads 1 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+            },
+            "fastq_2": {
+                "type": "string",
+                "format": "file-path",
+                "exists": true,
+                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?q\\.gz$",
+                "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+            },
+            "vcf": {
+                "type": "string",
+                "format": "file-path",
+                "exists": true,
+                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.vcf(\\.gz)?$",
+                "errorMessage": "VCF file cannot contain spaces and must have extension '.vcf' or '.vcf.gz'"
+            },
+            "barcode": {
+                "type": "string",
+                "format": "file-path",
+                "exists": true,
+                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.(tsv|txt)$",
+                "errorMessage": "Barcode file cannot contain spaces and must have extension '.tsv' or '.txt'"
+            }
+        },
+        "required": ["sample", "input_type"],
+        "allOf": [
+            {
+                "if": { "properties": { "input_type": { "const": "wgs" } } },
+                "then": {
+                    "required": ["fastq_1"],
+                    "errorMessage": "Rows with input_type 'wgs' must provide fastq_1"
+                }
+            },
+            {
+                "if": { "properties": { "input_type": { "const": "gbs" } } },
+                "then": {
+                    "required": ["fastq_1", "barcode"],
+                    "errorMessage": "Rows with input_type 'gbs' must provide fastq_1 and barcode"
+                }
+            },
+            {
+                "if": { "properties": { "input_type": { "const": "vcf" } } },
+                "then": {
+                    "required": ["vcf"],
+                    "errorMessage": "Rows with input_type 'vcf' must provide vcf"
+                }
+            }
+        ]
+    }
+}

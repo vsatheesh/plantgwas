@@ -1,0 +1,5 @@
+sample,input_type,fastq_1,fastq_2,vcf,barcode
+IR64,wgs,/path/to/IR64_R1.fq.gz,/path/to/IR64_R2.fq.gz,,
+Nipponbare,wgs,/path/to/Nip_R1.fq.gz,/path/to/Nip_R2.fq.gz,,
+plate1,gbs,/path/to/plate1_R1.fq.gz,,,/path/to/barcodes_plate1.tsv
+panel_array,vcf,,,/path/to/array_panel.vcf.gz,

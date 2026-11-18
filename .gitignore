@@ -1,0 +1,16 @@
+.nextflow*
+work/
+data/
+results/
+.DS_Store
+testing/
+testing*
+*.pyc
+null/
+.lineage/
+.nf-test/
+.nf-test.log
+
+# Personal working docs, not committed
+docs/setup-tutorial.md
+docs/Plant GWAS Pipeline — Design & Architecture.md
