@@ -22,3 +22,17 @@ It accepts three kinds of input: GBS reads (FASTQ), whole-genome resequencing re
 - Phenotype field-trial design or spatial correction beyond BLUPs/BLUEs from a mixed model.
 - Selection decisions: the pipeline ranks lines by GEBV, but crossing plans and selection indices stay with the breeder.
 
+## Landscape and gap
+
+No widely adopted, nf-core-grade plant GWAS pipeline exists today. The existing ones each cover part of the job.
+
+| Workflow | Engine | Covers | Gap for us |
+| --- | --- | --- | --- |
+| [DivAssociate](https://plant-commons.ipk-gatersleben.de/software/divassociate) | Nextflow | GWAS on crop diversity panels | Small user base, low activity; no GBS or WGS front end |
+| [kGWASflow](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10755180/) | Snakemake | Reference-free k-mer GWAS | Different method; no SNP-based multi-locus models |
+| [HAPPI GWAS](https://par.nsf.gov/servlets/purl/10226382) | R scripts | Pre-GWAS, GAPIT models, post-GWAS | Not a workflow manager; no containers or HPC scaling |
+| [PlantVarFilter](https://www.biorxiv.org/content/10.1101/2025.07.02.662805.full.pdf) | Python | Variant filtering + GWAS | Preprint; early stage |
+| [genepi/nf-gwas](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10849172/) | Nextflow | Biobank GWAS with REGENIE | Built for humans; no plant models, imputation or LD-window gene calls |
+
+What we reuse: nf-core modules for read QC, alignment, variant calling and PLINK; the nf-core template for schema, testing and CI. What we add: the GBS front end, imputation without a reference panel, GAPIT/rMVP multi-locus models, LD-decay windows and candidate-gene extraction.
+
