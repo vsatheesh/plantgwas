@@ -1,0 +1,22 @@
+chrom	pos	id	case	expected	reason
+Chr01	1000	drop_indel_2	drop_indel	drop	indel, not a SNP
+Chr01	3000	pass_common_6	pass_common	keep	SNP, MAF 0.2-0.5, little missing data
+Chr01	5000	drop_missing_1	drop_missing	drop	9 of 30 genotypes missing (0.30 > 0.2)
+Chr01	7000	pass_common_5	pass_common	keep	SNP, MAF 0.2-0.5, little missing data
+Chr01	9000	pass_alt_major_1	pass_alt_major	keep	ALT allele is the common one; MAF must fold to 0.1
+Chr01	11000	drop_monomorphic_1	drop_monomorphic	drop	no variation, MAF 0
+Chr01	13000	drop_missing_2	drop_missing	drop	9 of 30 genotypes missing (0.30 > 0.2)
+Chr01	15000	drop_indel_1	drop_indel	drop	indel, not a SNP
+Chr01	17000	pass_common_7	pass_common	keep	SNP, MAF 0.2-0.5, little missing data
+Chr01	19000	drop_maf_low_2	drop_maf_low	drop	1 carrier of 30, MAF 0.033 < 0.05
+Chr02	1000	drop_multiallelic_2	drop_multiallelic	drop	two ALT alleles, not biallelic
+Chr02	3000	pass_maf_edge_1	pass_maf_edge	keep	2 carriers of 30, MAF 0.067, just above 0.05
+Chr02	5000	pass_common_2	pass_common	keep	SNP, MAF 0.2-0.5, little missing data
+Chr02	7000	drop_maf_low_1	drop_maf_low	drop	1 carrier of 30, MAF 0.033 < 0.05
+Chr02	9000	pass_common_3	pass_common	keep	SNP, MAF 0.2-0.5, little missing data
+Chr02	11000	drop_multiallelic_1	drop_multiallelic	drop	two ALT alleles, not biallelic
+Chr02	13000	pass_common_8	pass_common	keep	SNP, MAF 0.2-0.5, little missing data
+Chr02	15000	pass_common_9	pass_common	keep	SNP, MAF 0.2-0.5, little missing data
+Chr02	17000	pass_common_1	pass_common	keep	SNP, MAF 0.2-0.5, little missing data
+Chr02	19000	pass_common_4	pass_common	keep	SNP, MAF 0.2-0.5, little missing data
+sample	L30	L30	bad_sample	drop	missing at 14 of 20 records (> 0.5)
