@@ -14,49 +14,81 @@
 
 ## Introduction
 
-**vsatheesh/plantgwas** is a bioinformatics pipeline that ...
+**plantgwas** is a reproducible [Nextflow](https://www.nextflow.io/) pipeline for genome-wide association studies (GWAS) and genomic prediction in plants. It takes a plant panel from raw genotypes to ranked candidate genes in one command, for any species that has a reference genome and a GFF3 annotation.
 
-<!-- TODO nf-core:
-   Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
-   major pipeline sections and the types of output it produces. You're giving an overview to someone new
-   to nf-core here, in 15-20 seconds. For an example, see https://github.com/nf-core/rnaseq/blob/master/README.md#introduction
--->
+It accepts three kinds of input: GBS reads, whole-genome resequencing reads, or an existing VCF. All three meet at one harmonised, filtered, imputed VCF, and everything after that point is shared. Multi-locus models (FarmCPU, BLINK) are the defaults, with MLM and GLM available for comparison. Candidate-gene windows come from the LD decay of the panel itself instead of a fixed distance, and the results are collected in a single HTML report.
 
-<!-- TODO nf-core: Include a figure that guides the user through the major workflow steps. Many nf-core
-     workflows use the "tube map" design for that. See https://nf-co.re/docs/community/brand/workflow-schematics#examples for examples.   -->
-<!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))2. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
+> [!WARNING]
+> **plantgwas is under active development and is not ready for use.** The samplesheet and its validation are in place, but the analysis steps are still being built, starting with the VCF route. Parameters and outputs will change.
+
+### Planned workflow
+
+1. Read QC and trimming for GBS and WGS reads ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/), [`fastp`](https://github.com/OpenGene/fastp))
+2. Alignment and variant calling (GBS and WGS routes only) ([`BWA-MEM2`](https://github.com/bwa-mem2/bwa-mem2), [`bcftools`](https://samtools.github.io/bcftools/))
+3. Harmonise the VCF, then marker and sample quality control ([`bcftools`](https://samtools.github.io/bcftools/), [`PLINK 2`](https://www.cog-genomics.org/plink/2.0/))
+4. Imputation without a reference panel ([`Beagle`](https://faculty.washington.edu/browning/beagle/beagle.html))
+5. Phenotype processing: BLUPs or BLUEs per line
+6. Population structure, kinship and LD decay
+7. Association with FarmCPU, BLINK and MLM, one job per trait and model ([`GAPIT`](https://github.com/jiabowang/GAPIT))
+8. Significance thresholds, peaks and candidate genes from the LD-decay window
+9. HTML report ([`MultiQC`](http://multiqc.info/))
+
+Genomic prediction (GBLUP, BayesB, RKHS and GWAS-assisted GBLUP with in-fold GWAS) is planned for version 1.0.
+
+### Development status
+
+| Step | Status |
+| --- | --- |
+| nf-core template, CI and linting | Done |
+| Samplesheet with `gbs`, `wgs` and `vcf` input types, validated at launch | Done |
+| Small test VCF with a known answer key | Done |
+| VCF route: harmonise, marker and sample QC | In progress |
+| Everything else above | Not started |
 
 ## Usage
 
 > [!NOTE]
 > If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/get_started/environment_setup/overview) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/get_started/run-your-first-pipeline) with `-profile test` before running the workflow on actual data.
 
-<!-- TODO nf-core: Describe the minimum required steps to execute the pipeline, e.g. how to prepare samplesheets.
-     Explain what rows and columns represent. For instance (please edit as appropriate):
-
-First, prepare a samplesheet with your input data that looks as follows:
+First, prepare a samplesheet with your input data. The `input_type` column selects the route for each row:
 
 `samplesheet.csv`:
 
 ```csv
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
+sample,input_type,fastq_1,fastq_2,vcf,barcode
+IR64,wgs,IR64_R1.fq.gz,IR64_R2.fq.gz,,
+plate1,gbs,plate1_R1.fq.gz,,,barcodes_plate1.tsv
+panel_array,vcf,,,array_panel.vcf.gz,
 ```
 
-Each row represents a fastq file (single-end) or a pair of fastq files (paired end).
+| Column | Used for | Notes |
+| --- | --- | --- |
+| `sample` | all rows | Name without spaces. For GBS, the plate name |
+| `input_type` | all rows | `wgs`, `gbs` or `vcf` |
+| `fastq_1`, `fastq_2` | `wgs`, `gbs` | Gzipped FASTQ; `fastq_2` only for paired-end WGS |
+| `vcf` | `vcf` | `.vcf` or `.vcf.gz` |
+| `barcode` | `gbs` | Barcode file (`.tsv` or `.txt`) for demultiplexing |
 
--->
+Rows of different types can be mixed. A row missing the files its type needs is rejected before anything runs. An example is in [`assets/samplesheet.csv`](assets/samplesheet.csv).
 
-Now, you can run the pipeline using:
+Pick the profile that matches where you run. You do not install any analysis tools yourself; Nextflow downloads them on the first run.
 
-<!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->
+| Where you run | Profile |
+| --- | --- |
+| HPC cluster | `-profile singularity` or `-profile apptainer` |
+| Laptop or workstation | `-profile docker` |
+| No container engine | `-profile conda` |
+
+The intended command, once the VCF route is complete:
 
 ```bash
 nextflow run vsatheesh/plantgwas \
-   -profile <docker/singularity/.../institute> \
+   -profile singularity \
    --input samplesheet.csv \
-   --outdir <OUTDIR>
+   --outdir results
 ```
+
+The reference genome, annotation and phenotype parameters (`--fasta`, `--gff`, `--phenotypes`) are added as those steps are built.
 
 > [!WARNING]
 > Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_; see [docs](https://nf-co.re/docs/running/run-pipelines#using-parameter-files).
@@ -64,10 +96,6 @@ nextflow run vsatheesh/plantgwas \
 ## Credits
 
 vsatheesh/plantgwas was originally written by Viswanathan Satheesh.
-
-We thank the following people for their extensive assistance in the development of this pipeline:
-
-<!-- TODO nf-core: If applicable, make list of people who have also contributed -->
 
 ## Contributions and Support
 
