@@ -81,6 +81,30 @@
                 }
             }
         },
+        "genotype_qc_options": {
+            "title": "Genotype QC options",
+            "type": "object",
+            "fa_icon": "fas fa-filter",
+            "description": "Marker filters applied to the VCF.",
+            "properties": {
+                 "maf": {
+                      "type": "number", 
+                      "default": 0.05,
+                      "minimum": 0, 
+                      "maximum": 0.5,
+                      "description": "Minimum minor allele frequency.",
+                      "fa_icon": "fas fa-percent"
+                 },
+                 "max_missing_snp": {
+                      "type": "number", 
+                      "default": 0.2,
+                      "minimum": 0, 
+                      "maximum": 1,
+                      "description": "Maximum fraction of missing genotypes allowed per marker.",
+                      "fa_icon": "fas fa-question"
+                 }
+            }
+        },
         "institutional_config_options": {
             "title": "Institutional config options",
             "type": "object",
@@ -244,6 +268,9 @@
         },
         {
             "$ref": "#/$defs/generic_options"
+        },
+        {
+            "$ref": "#/$defs/genotype_qc_options"
         }
     ]
 }
