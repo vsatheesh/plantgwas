@@ -9,6 +9,7 @@ include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_plantgwas_pipeline'
+include { GENO_PREP } from '../subworkflows/local/geno_prep/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -32,7 +33,17 @@ workflow PLANTGWAS {
     //
     // MODULE: Run FastQC
     //
-    FASTQC(ch_samplesheet)
+    // FASTQC(ch_samplesheet)
+    FASTQC(ch_samplesheet.filter { meta, _files -> meta.input_type == 'wgs'})
+    // 
+    // SUBWORKFLOW: genotype prepartion for VCF input
+    // 
+    def ch_vcf = ch_samplesheet 
+        .filter { meta, _files -> meta.input_type == 'vcf' }
+        .map { meta, files -> [ meta, files[0]  ]  }
+
+    GENO_PREP(ch_vcf)
+
     ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.map{ _meta, file -> file })
 
     //
